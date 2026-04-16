@@ -1,0 +1,132 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <ctype.h>
+#include <string.h>
+#include <unistd.h>
+
+
+void print_separator(int length) {
+
+    printf("\n");
+}
+
+void show_welcome() {
+    print_separator(70);
+    printf("       TAKE or REROLL - Risky Multiplier Game\n");
+    printf("       Die: 1–20   •   Max 20 attempts   •   Forced take on last roll\n");
+    printf("       FINAL SCORE = 10 × rolled_number × attempts_used\n");
+    printf("       → Closer to 4000 = better tier! (dynamic rewards)\n");
+    print_separator(70);
+    printf("\n");
+}
+
+int get_choice() {
+    char selection[16];
+    while (1) {
+        printf("  Take this roll  or  Roll again?  (t/r): ");
+        if (fgets(selection, sizeof(selection), stdin) == NULL) return -1;
+        char c = toupper(selection[0]);
+        if (c == 'T' || c == 'Y' || c == '1') return 1;  // take
+        if (c == 'R' || c == 'N' || c == '0') return 0;  // reroll
+        printf("  Please type t or r\n");
+    }
+}
+
+void print_tier(long long score) {
+    int dist = 4000 - (int)(score);   
+    printf("  Distance to 4000: %d\n", dist);
+    if (dist == 0) {
+        printf("🆙 PERFECT! Absolute jackpot! 🎉🔥\n");
+    } else if (dist <= 200) {
+        printf("🏆 OUTSTANDING! Top 1-2% elite! 🚀\n");
+    } else if (dist <= 400) {
+        printf("⭐ ELITE! Top 10% — incredible! 💎\n");
+    } else if (dist <= 770) {
+        printf("👍 EXCELLENT! Top 25% mastery! 👏\n");
+    } else if (dist <= 1000) {
+        printf("✅ GREAT! Beat the median! ⚡\n");
+    } else if (dist <= 1280) {
+        printf("📈 SOLID! Strong showing! 🌟\n");
+    } else if (dist <= 2000) {
+        printf("💪 Respectable — keep pushing! 🔄\n");
+    } else {
+        printf("😬 Tough one... replay for glory! 🎲\n");
+    }
+}
+
+void play_game() {
+    show_welcome();
+    sleep(6);
+
+    int max_attempts = 20;
+    int attempts = 0;
+    int final_roll = 0;
+    long long final_score = 0;
+
+    while (attempts < max_attempts) {
+        attempts++;
+        int roll = (rand() % 20) + 1;
+
+        printf("Attempt #%d/%d  →  Rolled: %d\n", attempts, max_attempts, roll);
+
+        long long potential = 10LL * roll * attempts;
+        printf("  If TAKE now → SCORE = 10 × %d × %d = %lld\n", roll, attempts, potential);
+
+        if (attempts == max_attempts) {
+            printf("  → LAST ATTEMPT → forced to take!\n");
+            final_roll = roll;
+            final_score = potential;
+            break;
+        }
+
+        int choice = get_choice();
+        if (choice == 1) {
+            final_roll = roll;
+            final_score = potential;
+            break;
+        }
+
+        printf("Rerolling...\n\n");
+    }
+
+    // Final result
+    print_separator(70);
+    printf("         G A M E   O V E R\n");
+    printf("Final roll        : %d\n", final_roll);
+    printf("Stopped at attempt: %d/%d\n", attempts, max_attempts);
+    printf("FINAL SCORE       = 10 × %d × %d = %d\n", final_roll, attempts, final_score);
+    print_separator(70);
+
+    print_tier(final_score);
+
+    print_separator(70);
+    printf("\n");
+}
+
+void main() {
+    srand((unsigned int)time(NULL));
+
+    printf("Welcome! Chase that 4000 with dynamic tiers! 🚀\n\n");
+
+    while (1) {
+        play_game();
+
+        char playagain[16];
+        printf("Play another game? (y/n): ");
+        if (fgets(playagain, sizeof(playagain), stdin) == NULL) break;
+
+        if (toupper(playagain[0]) != 'Y' && toupper(playagain[0]) != '1') {
+            printf("\nThanks for playing!\n");
+            break;
+        }
+
+        printf("\n");
+        //for (int i = 0; i < 40; i++) putchar('─');
+        printf(" NEW GAME ");
+        //for (int i = 0; i < 40; i++) putchar('─');
+        printf("\n\n");
+    }
+
+    //return 0;
+}
